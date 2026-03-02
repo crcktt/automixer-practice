@@ -1,21 +1,25 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
+from gpiozero import Servo
+from time import sleep
 
 class PumpController(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("AutoMixer V5 Test")
-        self.resize(400, 300) # Makes the window big enough to easily tap
+        self.resize(400, 300)
 
-        # 1. Create a large button for your finger
-        self.run_button = QPushButton("SPIN SERVO")
+        # 1. Setup the physical servo on GPIO 18
+        self.my_servo = Servo(18) 
+        self.my_servo.mid()
+
+        # 2. UI Setup
+        self.run_button = QPushButton("SPIN SERVO MAX")
         self.run_button.setMinimumHeight(120) 
-        
-        # 2. Wire the button tap to a function
         self.run_button.clicked.connect(self.trigger_motor)
 
-        # 3. Put the button in the middle of the screen
+        # 3. Layout Setup
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.run_button)
@@ -25,15 +29,16 @@ class PumpController(QMainWindow):
         self.setCentralWidget(container)
 
     def trigger_motor(self):
-        # This function runs every time you tap the screen
-        print("SCREEN TAPPED! Logic is working.")
+        # 4. The Hardware Logic
+        print("SCREEN TAPPED! Moving motor...")
         
-        # Flips the button text and color back and forth
-        if self.run_button.text() == "SPIN SERVO":
-            self.run_button.setText("STOP SERVO")
+        if self.run_button.text() == "SPIN SERVO MAX":
+            self.my_servo.max() 
+            self.run_button.setText("SPIN SERVO MIN")
             self.run_button.setStyleSheet("background-color: red; color: white; font-size: 24px;")
         else:
-            self.run_button.setText("SPIN SERVO")
+            self.my_servo.min() 
+            self.run_button.setText("SPIN SERVO MAX")
             self.run_button.setStyleSheet("font-size: 24px;")
 
 if __name__ == "__main__":
